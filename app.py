@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-import nmap
+from utils.network_scaning import run_nmap_scan, print_all_nmap_info
 
 app = Flask(__name__)
 
@@ -12,16 +12,17 @@ def home():
 @app.route('/nmap')
 def nmap_scan():
     target = request.args.get('target')  # Obtenez la cible à partir de la requête
-    if not target:
+    print(f"Scanning target: {target}")
+    if not target or target == "":
         return "Veuillez fournir une cible IP ou un nom de domaine."
 
-    # Utilisez nmap pour effectuer un scan
-    nm = nmap.PortScanner()
-    nm.scan(target)
+    results = run_nmap_scan(target)
+    print_all_nmap_info(results)
 
     # Traitez les résultats et retournez-les
-    return jsonify(nm.all_hosts())
+    return jsonify(results)
 
 
 if __name__ == "__main__":
     app.run(port=8080, debug=True)
+#     app.run(port=8080)
