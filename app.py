@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from utils.network_scaning import run_nmap_scan, print_all_nmap_info
+from utils.network_scaning import run_nmap_scan, debug_print_all_nmap_info
 
 app = Flask(__name__)
 
@@ -17,7 +17,7 @@ def nmap_scan():
         return "Veuillez fournir une cible IP ou un nom de domaine."
 
     results = run_nmap_scan(target)
-    print_all_nmap_info(results)
+    debug_print_all_nmap_info(results)
 
     # Traitez les résultats et retournez-les
     return jsonify(results)

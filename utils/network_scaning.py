@@ -1,7 +1,7 @@
 import nmap
 
 # Fonction pour afficher les résultats de Nmap sous forme de tableau
-def print_all_nmap_info(results):
+def debug_print_all_nmap_info(results):
     print("Nmap scan report results:")
     for host, info in results['scan'].items():
         print(f"Host: {host}")
@@ -24,4 +24,4 @@ def print_all_nmap_info(results):
 # Exemple d'utilisation de Nmap
 def run_nmap_scan(target):
     nm = nmap.PortScanner()
-    return nm.scan(target)
+    return nm.scan(target, "80-443")
