@@ -24,6 +24,19 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(event) {
         event.preventDefault();  // Empêche le rechargement de la page par défaut
 
+        statusContainer.innerHTML = '';
+
+        const target = document.getElementById('target').value.trim();
+
+         // Vérifie si l'entrée est une adresse IP valide ou un nom de domaine correct
+        const isValidInput = isValidIP(target) || isValidDomain(target);
+
+        if (!isValidInput) {
+            // Affiche un message d'erreur si l'entrée n'est ni une adresse IP valide ni un nom de domaine correct
+            statusContainer.innerHTML = '<p class="text-red-400">Invalid IP address or domain name.</p>';
+            return;
+        }
+
         // Affiche un message de chargement dans la zone des résultats
         statusContainer.innerHTML = ' <svg aria-hidden="true" class="w-12 h-12 mx-auto text-gray-200 animate-spin fill-teal-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">\n' +
             '        <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>\n' +
@@ -70,4 +83,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 statusContainer.innerHTML = `<p class="text-red-400">${errorMessage}</p>`;
             });
     });
+
+    // Fonction pour vérifier si l'entrée est une adresse IP valide
+    function isValidIP(input) {
+        // Expression régulière pour vérifier une adresse IP
+        const ipRegex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
+        return ipRegex.test(input);
+    }
+
+    // Fonction pour vérifier si l'entrée est un nom de domaine correct
+    function isValidDomain(input) {
+        // Expression régulière pour vérifier un nom de domaine
+        const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return domainRegex.test(input);
+    }
+
 });
