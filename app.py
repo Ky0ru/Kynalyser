@@ -14,7 +14,7 @@ def nmap_scan():
     target = request.args.get('target')  # Obtenez la cible à partir de la requête
     print(f"Scanning target: {target}")
     if not target or target == "":
-        return "Veuillez fournir une cible IP ou un nom de domaine."
+        return jsonify("Veuillez fournir une cible IP ou un nom de domaine.")
 
     results = run_nmap_scan(target)
     debug_print_all_nmap_info(results)
