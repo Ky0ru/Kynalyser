@@ -13,12 +13,11 @@
         <div class="flex items-center flex-1 w-full overflow-x-hidden min-h-full dark">
             <form id="nmapForm" class="flex mx-auto flex-col p-12 mt-12">
                 <label for="target" class="block text-sm text-gray-500 dark:text-gray-300">Target (IP or domain name):</label>
-                <input type="text" id="target" name="target" placeholder="192.168.1.25 or target.com" class="block w-full placeholder-gray-400/70 dark:placeholder-gray-500 rounded-lg border border-gray-200 bg-white mt-4 px-5 py-2.5 text-gray-700 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300">
+                <input type="text" id="target" name="target" placeholder="192.168.1.25 or target.com" value="example.com" class="block w-full placeholder-gray-400/70 dark:placeholder-gray-500 rounded-lg border border-gray-200 bg-white mt-4 px-5 py-2.5 text-gray-700 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300">
                 <button type="submit" class="flex items-center justify-center h-12 px-6 w-64 bg-gradient-to-r to-emerald-600 from-sky-400 mt-8 rounded font-semibold text-sm text-blue-100 hover:bg-blue-700">Start the scan</button>
             </form>
         </div>
-
-        <div id="statusContainer" class="flex mx-auto flex-col"></div>
+        <div id="statusContainer" class="flex mx-auto flex-col pb-4"></div>
         <div id="cardsContainer" class="flex flex-wrap gap-6 justify-center"></div>
     </section>
 
