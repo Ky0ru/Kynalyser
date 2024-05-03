@@ -24,7 +24,7 @@ def debug_print_all_nmap_info(results):
 
 # Exemple d'utilisation de Nmap
 def run_nmap_scan(target):
-    print("Running Nmap scan on {target}...")
+    print(f"Running Nmap scan on {target}...")
     nm = nmap.PortScanner()
-    # return nm.scan(target, "80-443")
-    return nm.scan(target)
+    return nm.scan(target, "80-443")
+    # return nm.scan(target)
