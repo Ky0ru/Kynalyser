@@ -1,5 +1,8 @@
 const statusContainer = document.getElementById('statusContainer');
 const ErrorContainer = document.getElementById('ErrorContainer');
+const cardsBox = document.getElementById('cardsContainer');
+const reportBtn = document.getElementById('report-btn');
+
 
 function createNMAPCard(scan, nmap) {
     const card = document.createElement('div');
@@ -119,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const target = document.getElementById('target').value.trim();
 
-         // Vérifie si l'entrée est une adresse IP valide ou un nom de domaine correct
+        // Vérifie si l'entrée est une adresse IP valide ou un nom de domaine correct
         const isValidInput = isValidIP(target) || isValidDomain(target);
 
         if (!isValidInput) {
@@ -128,11 +131,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-            const cardsBox = document.getElementById('cardsContainer');
-            const card = document.createElement('div');
-            card.id = target + '_card';
-            card.className = 'flex flex-wrap gap-6 justify-center items-baseline w-full mt-4 border-t border-gray-200 pt-4';
-            const cardsContainer = cardsBox.appendChild(card)
+        reportBtn.classList.remove('hidden');
+
+        const card = document.createElement('div');
+        card.id = target + '_card';
+        card.className = 'flex flex-wrap gap-6 justify-center items-baseline w-full mt-4 border-t border-gray-200 pt-4';
+        const cardsContainer = cardsBox.appendChild(card)
 
         // Affiche un message de chargement dans la zone des résultats
         statusContainer.innerHTML = ' <svg aria-hidden="true" class="w-12 h-12 mx-auto text-gray-200 animate-spin fill-teal-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">\n' +
@@ -147,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Envoie une requête GET à la vue Flask avec les données du formulaire
         fetch('/nmap?' + new URLSearchParams(formData))
-            .then(function(response) {
+            .then(function (response) {
                 // Vérifie si la réponse est OK
                 if (!response.ok) {
                     throw new Error('Erreur lors de la récupération des résultats.');
@@ -155,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Convertit la réponse en JSON
                 return response.json();
             })
-            .then(function(data) {
+            .then(function (data) {
                 console.log(data)
                 // Affiche les résultats dans la zone des résultats
                 statusContainer.innerHTML = '';
@@ -170,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     cardsContainer.appendChild(card);
                 });
             })
-            .catch(function(error) {
+            .catch(function (error) {
                 // Affiche un message d'erreur en cas d'échec de la requête
                 const errorText = error.message || 'Error retrieving results.';
                 console.error('Erreur:', errorText);
@@ -183,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
         fetch('/whois?' + new URLSearchParams(formData))
-            .then(function(response) {
+            .then(function (response) {
                 // Vérifie si la réponse est OK
                 if (!response.ok) {
                     throw new Error('Erreur lors de la récupération des résultats.');
@@ -191,16 +195,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Convertit la réponse en JSON
                 return response.json();
             })
-            .then(function(data) {
+            .then(function (data) {
                 console.log(data)
 
                 if (data.error) {
                     throw new Error(data.error);
                 }
                 const card = createWhoisCard(data);
-               cardsContainer.appendChild(card);
+                cardsContainer.appendChild(card);
             })
-            .catch(function(error) {
+            .catch(function (error) {
                 // Affiche un message d'erreur en cas d'échec de la requête
                 const errorText = error.message || 'Error retrieving results.';
                 console.error('Erreur:', errorText);
@@ -211,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 ErrorContainer.appendChild(errorP);
             });
         fetch('/dnsrecon?' + new URLSearchParams(formData))
-            .then(function(response) {
+            .then(function (response) {
                 // Vérifie si la réponse est OK
                 if (!response.ok) {
                     throw new Error('Erreur lors de la récupération des résultats.');
@@ -219,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Convertit la réponse en JSON
                 return response.json();
             })
-            .then(function(data) {
+            .then(function (data) {
                 console.log(data)
 
                 if (data.error) {
@@ -230,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 cardsContainer.prepend(map)
                 cardsContainer.appendChild(card);
             })
-            .catch(function(error) {
+            .catch(function (error) {
                 // Affiche un message d'erreur en cas d'échec de la requête
                 const errorText = error.message || 'Error retrieving results.';
                 console.error('Erreur:', errorText);
@@ -241,6 +245,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 ErrorContainer.appendChild(errorP);
             });
     });
+
+    reportBtn.addEventListener("click", function () {
+        html2pdf().from(cardsBox).save('myDocument.pdf')
+        // window.print()
+    });
+
 
     // Fonction pour vérifier si l'entrée est une adresse IP valide
     function isValidIP(input) {
