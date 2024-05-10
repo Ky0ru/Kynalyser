@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from utils.network_scaning import run_nmap_scan, debug_print_all_nmap_info
-from utils.dns_scaning import run_whois_scan, debug_whois_scan
+from utils.dns_scaning import run_whois_scan, debug_whois_scan, run_dns_dumpster_scan, debug_dns_dumpster
 
 app = Flask(__name__)
 
@@ -14,23 +14,27 @@ def home():
 def nmap_scan():
     target = request.args.get('target')  # Obtenez la cible à partir de la requête
     if not target or target == "":
-        return
-
+        return jsonify({"error": "No target provided"})
     results = run_nmap_scan(target)
     debug_print_all_nmap_info(results)
-
-    # Traitez les résultats et retournez-les
     return jsonify(results)
 
 @app.route('/whois')
 def whois_scan():
     target = request.args.get('target')  # Obtenez la cible à partir de la requête
     if not target or target == "":
-        return
+        return jsonify({"error": "No target provided"})
     results = run_whois_scan(target)
     debug_whois_scan(results)
+    return jsonify(results)
 
-    # Traitez les résultats et retournez-les
+@app.route('/dnsrecon')
+def dnsrecon_scan():
+    target = request.args.get('target')  # Obtenez la cible à partir de la requête
+    if not target or target == "":
+        return jsonify({"error": "No target provided"})
+    results = run_dns_dumpster_scan(target)
+    debug_dns_dumpster(results)
     return jsonify(results)
 
 if __name__ == "__main__":

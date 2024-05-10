@@ -1,6 +1,8 @@
 import os
 import re
 import json
+from utils.DNSDumpsterAPI import DNSDumpsterAPI
+
 
 def run_whois_scan(target):
     print(f"Running whois scan on {target}...")
@@ -88,10 +90,57 @@ def run_whois_scan(target):
         if registrar_info:
             whois_info["Registrant"] = registrar_info
     return whois_info
-def run_dnsrecon_scan(target):
-    print(f"Running dnsrecon scan on {target}...")
-    os.popen(f"dnsrecon -d {target} -D /usr/share/wordlists/amass/subdomains-top1mil-5000.txt -t brt --json resultat.json").read()
+
 
 def debug_whois_scan(results):
     print("Whois scan result:")
     print(json.dumps(results, indent=4))
+
+
+def run_dns_dumpster_scan(target):
+    res = DNSDumpsterAPI(True).search(target)
+
+    if not res['dns_records']['dns']:
+        error_message = {"error": "Domain not found"}
+        return error_message
+
+    dns_servers = [
+        {"domain": entry['domain'], "ip": entry['ip'], "as": entry['as'], "provider": entry['provider'],
+         "country": entry['country']}
+        for entry in res.get('dns_records', {}).get('dns', [])
+    ]
+    mx_records = [
+        {"domain": entry['domain'], "ip": entry['ip'], "as": entry['as'], "provider": entry['provider'],
+         "country": entry['country']}
+        for entry in res.get('dns_records', {}).get('mx', [])
+    ]
+    host_records = [
+        {"domain": entry['domain'], "ip": entry['ip'], "as": entry['as'], "provider": entry['provider'],
+         "country": entry['country'], "reverse_dns": entry['reverse_dns']}
+        if entry.get('reverse_dns') else {"domain": entry['domain'], "ip": entry['ip'], "as": entry['as'],
+                                          "provider": entry['provider'], "country": entry['country']}
+        for entry in res.get('dns_records', {}).get('host', [])
+    ]
+    txt_records = res.get('dns_records', {}).get('txt', [])
+
+    image_data = res.get('image_data').decode('utf-8')
+    image_retrieved = image_data is not None
+
+    return {
+        "domain": res.get('domain'),
+        "dns_servers": dns_servers,
+        "mx_records": mx_records,
+        "host_records": host_records,
+        "txt_records": txt_records,
+        "image_retrieved": image_retrieved,
+        "image_data": image_data,
+    }
+
+
+def debug_dns_dumpster(results):
+    print("DNS dumpster scan result:")
+    results_copy = results.copy()
+    if 'image_data' in results_copy:
+        if results_copy['image_data']:
+            results_copy['image_data'] = "Image data retrieved"
+    print(json.dumps(results_copy, indent=4))
