@@ -10,15 +10,19 @@
 
     <style>
         @media print {
-          body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 0;
-            color: #333;
-          }
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                color: #333;
+            }
             .remove_for_report{
                 display: none;
-
+                margin: 0;
+                padding: 0;
+            }
+            #cardsContainer{
+                padding: 0;
             }
         }
 </style>
@@ -39,8 +43,10 @@
             <div id="ErrorContainer" class="flex mx-auto flex-col pb-4"></div>
         </div>
         <div id="cardsContainer" class="flex mx-auto flex-col pb-4"></div>
-        <div class="remove_for_report flex items-center flex-1 justify-center w-full overflow-x-hidden min-h-full dark">
-            <button id="report-btn" class="remove_for_report flex items-center justify-center h-12 px-6 w-64 bg-gradient-to-r to-emerald-600 from-sky-400 mt-8 rounded font-semibold text-sm text-blue-100 hover:bg-blue-700 hidden" >Make report</button>
+        <div class="remove_for_report">
+            <div class="flex items-center flex-1 justify-center w-full overflow-x-hidden min-h-full dark">
+                <button id="report-btn" class="remove_for_report flex items-center justify-center h-12 px-6 w-64 bg-gradient-to-r to-emerald-600 from-sky-400 mt-8 rounded font-semibold text-sm text-blue-100 hover:bg-blue-700 hidden" >Make report</button>
+            </div>
         </div>
     </section>
     <script src="../static/app.js"></script>
