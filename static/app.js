@@ -151,104 +151,160 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Envoie une requête GET à la vue Flask avec les données du formulaire
         fetch('/nmap?' + new URLSearchParams(formData))
-            .then(function (response) {
-                // Vérifie si la réponse est OK
+            .then(function(response) {
+                // Check if the response is OK
                 if (!response.ok) {
-                    throw new Error('Erreur lors de la récupération des résultats.');
+                    throw new Error('Error retrieving results.');
                 }
-                // Convertit la réponse en JSON
+                // Convert the response to JSON
                 return response.json();
             })
-            .then(function (data) {
-                console.log(data)
-                // Affiche les résultats dans la zone des résultats
+            .then(function(data) {
+                console.log(data);
+                // Afficher les résultats dans la zone des résultats
                 statusContainer.innerHTML = '';
 
-                if (data.nmap && data.nmap.scaninfo && data.nmap.scaninfo.error) {
-                    throw new Error(data.nmap.scaninfo.error);
-                    //statusContainer.innerHTML += `<p class="text-red-400">${data.nmap.scaninfo.error.join('<br>')}</p>`;
+                // Récupérer la clé du seul élément de l'objet JSON
+                const domainKey = Object.keys(data)[0];
+                const domainData = data[domainKey];
+
+                // Vérifier s'il y a une erreur dans les informations de numérisation Nmap pour ce domaine
+                if (domainData.nmap && domainData.nmap.scaninfo && domainData.nmap.scaninfo.error) {
+                    const errorP = document.createElement('p');
+                    errorP.className = 'text-red-400';
+                    errorP.innerHTML = `Nmap: ${domainData.nmap.scaninfo.error || 'Error retrieving Nmap results.'}`;
+                    ErrorContainer.appendChild(errorP);
                 }
-                // Crée et affiche une carte pour chaque hôte scanné
-                Object.values(data.scan).forEach(hostData => {
-                    const card = createNMAPCard(hostData, data.nmap);
+
+                // Créer et afficher une carte pour chaque hôte numérisé de ce domaine
+                Object.values(domainData.scan).forEach(hostData => {
+                    const card = createNMAPCard(hostData, domainData.nmap);
                     cardsContainer.appendChild(card);
                 });
-            })
-            .catch(function (error) {
-                // Affiche un message d'erreur en cas d'échec de la requête
-                const errorText = error.message || 'Error retrieving results.';
-                console.error('Erreur:', errorText);
 
-                const errorMessage = errorText.substring(0, errorText.indexOf("WARNING:"));
+
+                // Fetch for Whois results
+                fetch('/whois?' + new URLSearchParams(formData))
+                    .then(function(response) {
+                        // Check if the response is OK
+                        if (!response.ok) {
+                            throw new Error('Error retrieving Whois results.');
+                        }
+                        // Convert the response to JSON
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        console.log(data);
+
+                        if (data.error) {
+                            throw new Error(data.error);
+                        }
+                        const card = createWhoisCard(data);
+                        cardsContainer.appendChild(card);
+
+                        // Fetch for DNS Recon results
+                        fetch('/dnsrecon?' + new URLSearchParams(formData))
+                            .then(function(response) {
+                                // Check if the response is OK
+                                if (!response.ok) {
+                                    throw new Error('Error retrieving DNS Recon results.');
+                                }
+                                // Convert the response to JSON
+                                return response.json();
+                            })
+                            .then(function(data) {
+                                console.log(data);
+                                if (data.error) {
+                                    throw new Error(data.error);
+                                }
+                                // Create a card for DNS Dumpster results
+                                const card = createDNSDumpsterCard(data);
+                                const img = createDNSMap(data);
+                                // Create a card for Nmap subdomains
+                                const queryParams = new URLSearchParams();
+                                const targetDomains = data.host_records.map(record => record.domain).join(',');
+                                queryParams.append('target', targetDomains);
+                                fetch('/sub-domains-nmap?' + queryParams)
+                                    .then(function(response) {
+                                        // Check if the response is OK
+                                        if (!response.ok) {
+                                            throw new Error('Error retrieving Nmap subdomains results.');
+                                        }
+                                        // Convert the response to JSON
+                                        return response.json();
+                                    })
+                                    .then(function(subdomainData) {
+                                       console.log(subdomainData);
+                                        // Afficher les résultats dans la zone des résultats
+                                        statusContainer.innerHTML = '';
+
+                                        // Parcourir toutes les clés dans l'objet JSON
+                                        for (const domainKey in subdomainData) {
+                                            if (Object.hasOwnProperty.call(subdomainData, domainKey)) {
+                                                const domainData = subdomainData[domainKey];
+                                                console.log(domainData);
+
+                                                // Vérifier s'il y a une erreur dans les informations de numérisation Nmap pour ce domaine
+                                                if (domainData.nmap && domainData.nmap.scaninfo && domainData.nmap.scaninfo.error) {
+                                                    const errorP = document.createElement('p');
+                                                    errorP.className = 'text-red-400';
+                                                    errorP.innerHTML = `Nmap: ${domainData.nmap.scaninfo.error || 'Error retrieving Nmap results.'}`;
+                                                    ErrorContainer.appendChild(errorP);
+                                                }
+                                                if (domainData.nmap.scanstats.uphosts === '0') {
+                                                    const errorP = document.createElement('p');
+                                                    errorP.className = 'text-red-400';
+                                                    errorP.innerHTML = `Nmap: No hosts found for ${domainKey}`;
+                                                    ErrorContainer.appendChild(errorP);
+
+                                                }
+
+                                                // Créer et afficher une carte pour chaque hôte numérisé de ce domaine
+                                                Object.values(domainData.scan).forEach(hostData => {
+                                                    const card = createNMAPCard(hostData, domainData.nmap);
+                                                    cardsContainer.appendChild(card);
+                                                });
+                                            }
+                                        }
+
+                                    })
+                                    .catch(function(error) {
+                                        console.error('Error:', error.message || 'Error retrieving Nmap subdomains results.');
+                                    });
+
+                                // Add the DNS Dumpster results card to the end of the list
+                                cardsContainer.appendChild(card);
+                                cardsContainer.prepend(img)
+
+                            })
+                            .catch(function(error) {
+                                console.error('Error:', error.message || 'Error retrieving DNS Recon results.');
+                                const errorP = document.createElement('p');
+                                errorP.className = 'text-red-400';
+                                errorP.innerHTML = `DNS Recon: ${error.message || 'Error retrieving DNS Recon results.'}`;
+                                ErrorContainer.appendChild(errorP);
+                            });
+                    })
+                    .catch(function(error) {
+                        console.error('Error:', error.message || 'Error retrieving Whois results.');
+                        const errorP = document.createElement('p');
+                        errorP.className = 'text-red-400';
+                        errorP.innerHTML = `Whois: ${error.message || 'Error retrieving Whois results.'}`;
+                        ErrorContainer.appendChild(errorP);
+                    });
+            })
+            .catch(function(error) {
+                console.error('Error:', error.message || 'Error retrieving Nmap results.');
                 const errorP = document.createElement('p');
                 errorP.className = 'text-red-400';
-                errorP.innerHTML = `NMAP: ${errorMessage}`;
-                ErrorContainer.appendChild(errorP);
-            });
-
-        fetch('/whois?' + new URLSearchParams(formData))
-            .then(function (response) {
-                // Vérifie si la réponse est OK
-                if (!response.ok) {
-                    throw new Error('Erreur lors de la récupération des résultats.');
-                }
-                // Convertit la réponse en JSON
-                return response.json();
-            })
-            .then(function (data) {
-                console.log(data)
-
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                const card = createWhoisCard(data);
-                cardsContainer.appendChild(card);
-            })
-            .catch(function (error) {
-                // Affiche un message d'erreur en cas d'échec de la requête
-                const errorText = error.message || 'Error retrieving results.';
-                console.error('Erreur:', errorText);
-
-                const errorP = document.createElement('p');
-                errorP.className = 'text-red-400';
-                errorP.innerHTML = `Whois: ${errorText}`;
-                ErrorContainer.appendChild(errorP);
-            });
-        fetch('/dnsrecon?' + new URLSearchParams(formData))
-            .then(function (response) {
-                // Vérifie si la réponse est OK
-                if (!response.ok) {
-                    throw new Error('Erreur lors de la récupération des résultats.');
-                }
-                // Convertit la réponse en JSON
-                return response.json();
-            })
-            .then(function (data) {
-                console.log(data)
-
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                const card = createDNSDumpsterCard(data);
-                const map = createDNSMap(data);
-                cardsContainer.prepend(map)
-                cardsContainer.appendChild(card);
-            })
-            .catch(function (error) {
-                // Affiche un message d'erreur en cas d'échec de la requête
-                const errorText = error.message || 'Error retrieving results.';
-                console.error('Erreur:', errorText);
-
-                const errorP = document.createElement('p');
-                errorP.className = 'text-red-400';
-                errorP.innerHTML = `DNSRecon: ${errorText}`;
+                errorP.innerHTML = `Nmap: ${error.message || 'Error retrieving Nmap results.'}`;
                 ErrorContainer.appendChild(errorP);
             });
     });
 
     reportBtn.addEventListener("click", function () {
-        html2pdf().from(cardsBox).save('myDocument.pdf')
-        // window.print()
+        //html2pdf().from(cardsBox).save('myDocument.pdf')
+        window.print()
     });
 
 

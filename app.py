@@ -36,6 +36,14 @@ def dnsrecon_scan():
     results = run_dns_dumpster_scan(target)
     debug_dns_dumpster(results)
     return jsonify(results)
+@app.route('/sub-domains-nmap')
+def sub_domains_nmap():
+    target = request.args.get('target')
+    if not target or target == "":
+        return jsonify({"error": "No target provided"})
+    results = run_nmap_scan(target)
+    debug_print_all_nmap_info(results)
+    return jsonify(results)
 
 if __name__ == "__main__":
     app.run(port=8080, debug=True)
