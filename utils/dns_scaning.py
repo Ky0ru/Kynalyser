@@ -98,7 +98,7 @@ def debug_whois_scan(results):
 
 
 def run_dns_dumpster_scan(target):
-    res = DNSDumpsterAPI(True).search(target)
+    res = DNSDumpsterAPI().search(target)
 
     if not res['dns_records']['dns']:
         error_message = {"error": "Domain not found"}

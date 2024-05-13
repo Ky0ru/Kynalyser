@@ -66,8 +66,8 @@ def run_nmap_scan(targets):
     nm = nmap.PortScanner()
     results = {}
     for target in targets.split(','):
-        scan_result = nm.scan(target.strip(), arguments="-sV -p 80-443")
+        scan_result = nm.scan(target.strip(), arguments="-sV")
         results[target] = scan_result
-        print(results)
+        #print(results)
     return results
 
