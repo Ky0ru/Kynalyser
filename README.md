@@ -1,7 +1,11 @@
 ![Projet Kynalyser banner](./banner.png)
 ### Kynalyser
 
-Kynalyser est une toolbox pour le pentest en particulier pour l'étape de la reconnaissance. Realisé en Python, il permet de réaliser des scans de ports, de sous-domaines, de faire du DNS Mapping, du Reverse DNS Mapping, de récupérer des informations Whois et bien d'autres. Elle dispose d'une interface web simple et intuitive pour faciliter son utilisation.
+Kynalyser est une toolbox pour le pentest en particulier pour l'étape de la reconnaissance. 
+
+Realisé en Python, elle permet de réaliser des scans de ports, de sous-domaines, de faire du DNS Mapping, du Reverse DNS Mapping, de récupérer des informations Whois et bien d'autres. 
+
+Elle dispose d'une interface web simple et intuitive pour faciliter son utilisation.
 
 Ce projet est réalisé dans le cadre d'un projet d'étude de SUP DE VINCI - CYBERSECURITY sous la supervision de M. BRAMLI Nathan
 
