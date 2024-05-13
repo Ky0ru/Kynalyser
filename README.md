@@ -5,7 +5,7 @@ Kynalyser est une toolbox pour le pentest en particulier pour l'étape de la rec
 ### Prérequis
 
 - Kali Linux or Parrot OS
-- Python 3.8
+- Python 3.11
 - Connexion internet
 
 ### Installation
