@@ -16,7 +16,7 @@ def nmap_scan():
     if not target or target == "":
         return jsonify({"error": "No target provided"})
     results = run_nmap_scan(target)
-    debug_print_all_nmap_info(results)
+    #debug_print_all_nmap_info(results)
     return jsonify(results)
 
 @app.route('/whois')
@@ -25,7 +25,7 @@ def whois_scan():
     if not target or target == "":
         return jsonify({"error": "No target provided"})
     results = run_whois_scan(target)
-    debug_whois_scan(results)
+    #debug_whois_scan(results)
     return jsonify(results)
 
 @app.route('/dnsrecon')
@@ -34,7 +34,7 @@ def dnsrecon_scan():
     if not target or target == "":
         return jsonify({"error": "No target provided"})
     results = run_dns_dumpster_scan(target)
-    debug_dns_dumpster(results)
+    #debug_dns_dumpster(results)
     return jsonify(results)
 @app.route('/sub-domains-nmap')
 def sub_domains_nmap():
@@ -42,9 +42,9 @@ def sub_domains_nmap():
     if not target or target == "":
         return jsonify({"error": "No target provided"})
     results = run_nmap_scan(target)
-    debug_print_all_nmap_info(results)
+    #debug_print_all_nmap_info(results)
     return jsonify(results)
 
 if __name__ == "__main__":
-    app.run(port=8080, debug=True)
-#     app.run(port=8080)
+    #app.run(port=8080, debug=True)
+    app.run(port=8080)
