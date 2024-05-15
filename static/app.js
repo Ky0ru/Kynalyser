@@ -110,7 +110,30 @@ function createDNSMap(data){
 
     return card;
 }
+function createExploitCard(exploitData) {
+    // Check if RESULTS_EXPLOIT is empty
+    const card = document.createElement('div');
+    card.className = 'card bg-white rounded-lg shadow-md p-4';
 
+    // Get the first 10 exploits
+    const firstTenExploits = exploitData.RESULTS_EXPLOIT.slice(0, 10);
+
+    card.innerHTML = `
+        <h2 class="text-lg font-semibold">Exploit search results for "${exploitData.SEARCH}"</h2>
+        <p class="text-sm text-gray-500"><span class="font-bold">DB Path:</span> ${exploitData.DB_PATH_EXPLOIT}</p>
+        <h3 class="text-md font-semibold mt-4">Exploit Results:</h3>
+        <ul class="mt-2">
+            ${firstTenExploits.map(exploit => `
+            <li class="text-sm text-gray-500">
+                <span class="font-bold">${exploit.Title}:</span>
+                <a class="text-sky-400" href="${exploit.URL}" target="_blank">${exploit.URL}</a>
+            </li>`).join('')}
+        </ul>
+        ${exploitData.RESULTS_EXPLOIT.length > 10 ? '<a href="#" class="text-sky-400">See more</a>' : ''}
+    `;
+
+    return card;
+}
 document.addEventListener('DOMContentLoaded', function() {
     // Récupère le formulaire
     const form = document.getElementById('Form');
@@ -179,6 +202,30 @@ document.addEventListener('DOMContentLoaded', function() {
                // Créer et afficher une carte pour chaque hôte numérisé de ce domaine
                Object.values(domainData.scan).forEach(hostData => {
                    const card = createNMAPCard(hostData, domainData.nmap);
+                    // Iterate over each service in the tcp object
+                    for (const [port, serviceData] of Object.entries(hostData.tcp)) {
+                        // Extract the service name and version
+                        const serviceProduct = serviceData.product;
+                        const serviceVersion = serviceData.version;
+
+                        // Fetch the exploit data for this service
+                        fetch('/search_exploit?' + new URLSearchParams({service: serviceProduct, version: serviceVersion}))
+                            .then(function(response) {
+                                // Check if the response is OK
+                                if (!response.ok) {
+                                    throw new Error('Error retrieving search exploit results.');
+                                }
+                                // Convert the response to JSON
+                                return response.json();
+                            })
+                            .then(function(exploitData) {
+                                console.log(exploitData);
+                                    if (exploitData.RESULTS_EXPLOIT && exploitData.RESULTS_EXPLOIT.length > 1) {
+                                        let exploitPcard = createExploitCard(exploitData);
+                                        cardsContainer.appendChild(exploitPcard);
+                                    }
+                            })
+                    }
                    cardsContainer.appendChild(card);
                });
            })
@@ -189,8 +236,8 @@ document.addEventListener('DOMContentLoaded', function() {
                errorP.innerHTML = `Nmap: ${error.message || 'Error retrieving Nmap results.'}`;
                ErrorContainer.appendChild(errorP);
            });
-       // Fetch for Whois results
-       fetch('/whois?' + new URLSearchParams(formData))
+        if(isValidDomain(target)){
+            fetch('/whois?' + new URLSearchParams(formData))
            .then(function(response) {
                // Check if the response is OK
                if (!response.ok) {
@@ -297,6 +344,7 @@ document.addEventListener('DOMContentLoaded', function() {
                errorP.innerHTML = `DNS Recon: ${error.message || 'Error retrieving DNS Recon results.'}`;
                ErrorContainer.appendChild(errorP);
            });
+        }
     });
 
     reportBtn.addEventListener("click", function () {
