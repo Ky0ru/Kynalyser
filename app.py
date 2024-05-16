@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from utils.network_scaning import run_nmap_scan, debug_print_all_nmap_info
 from utils.dns_scaning import run_whois_scan, debug_whois_scan, run_dns_dumpster_scan, debug_dns_dumpster
-from utils.search_exploit import search_exploit
+from utils.search_exploit import search_exploit, exec_payload
 
 app = Flask(__name__)
 
@@ -56,6 +56,25 @@ def search_vuln():
         version = ""
     results = search_exploit(service, version)
     return results
+
+@app.route('/run_exploit')
+def run_exploit():
+    service = request.args.get('service')
+    version = request.args.get('version')
+    name = request.args.get('name')
+    target = request.args.get('target')
+    if not service or service == "":
+        return jsonify({"error": "No service provided"})
+    if not version or version == "":
+        version = ""
+    if not name or name == "":
+        return jsonify({"error": "No name provided"})
+    if not target or target == "":
+        return jsonify({"error": "No target provided"})
+
+    results = exec_payload(target, service, version, name)
+
+    return jsonify(results)
 
 if __name__ == "__main__":
     app.run(port=8080, debug=True)

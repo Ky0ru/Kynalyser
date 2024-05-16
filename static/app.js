@@ -183,7 +183,6 @@ document.addEventListener('DOMContentLoaded', function() {
                return response.json();
            })
            .then(function(data) {
-               console.log(data);
                // Afficher les résultats dans la zone des résultats
                statusContainer.innerHTML = '';
 
@@ -207,6 +206,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Extract the service name and version
                         const serviceProduct = serviceData.product;
                         const serviceVersion = serviceData.version;
+                        const serviceName = serviceData.name;
+                        const target = formData.get('target').toString()
 
                         // Fetch the exploit data for this service
                         fetch('/search_exploit?' + new URLSearchParams({service: serviceProduct, version: serviceVersion}))
@@ -219,12 +220,49 @@ document.addEventListener('DOMContentLoaded', function() {
                                 return response.json();
                             })
                             .then(function(exploitData) {
-                                console.log(exploitData);
                                     if (exploitData.RESULTS_EXPLOIT && exploitData.RESULTS_EXPLOIT.length > 1) {
                                         let exploitPcard = createExploitCard(exploitData);
                                         cardsContainer.appendChild(exploitPcard);
                                     }
                             })
+                        fetch('/run_exploit?' + new URLSearchParams({service: serviceProduct, version: serviceVersion, name: serviceName, target: target}))
+                        .then(function(response) {
+                            // Check if the response is OK
+                            if (!response.ok) {
+                                throw new Error('Error retrieving search exploit results.');
+                            }
+                            // Convert the response to JSON
+                            return response.json();
+                        })
+                        .then(function(exploitData) {
+                            console.log(exploitData);
+                            if (exploitData.error) {
+                                throw new Error(exploitData.error);
+                            }
+                            const card = document.createElement('div');
+                            card.className = 'card rounded-lg shadow-md p-4 bg-white';
+
+                            // Create a unique ID for the copy button
+                            const copyButtonId = `copyButton_${Math.random().toString(36).substring(2, 15)}`;
+
+                            card.innerHTML = `
+                            <h2 class="text-lg font-semibold">Payload found for ${serviceProduct} (${serviceVersion})</h2>
+                            <p class="text-sm text-gray-900">Payload command line used: ${exploitData.payload}</p>
+                            <button id="${copyButtonId}" class="copyButton mt-4 bg-gradient-to-r to-emerald-600 from-sky-400 text-white font-bold py-2 px-4 rounded">
+                                Copy Payload
+                            </button>
+                            `;
+                            cardsContainer.appendChild(card);
+
+                            // Add click event listener to the copy button
+                            document.getElementById(copyButtonId).addEventListener('click', function() {
+                                navigator.clipboard.writeText(exploitData.payload).then(function() {
+                                    console.log('Copying to clipboard was successful!');
+                                }, function(err) {
+                                    console.error('Could not copy text: ', err);
+                                });
+                            });
+                        })
                     }
                    cardsContainer.appendChild(card);
                });
@@ -247,8 +285,6 @@ document.addEventListener('DOMContentLoaded', function() {
                return response.json();
            })
            .then(function(data) {
-               console.log(data);
-
                if (data.error) {
                    throw new Error(data.error);
                }
@@ -273,7 +309,6 @@ document.addEventListener('DOMContentLoaded', function() {
                return response.json();
            })
            .then(function(data) {
-               console.log(data);
                if (data.error) {
                    throw new Error(data.error);
                }
@@ -294,7 +329,6 @@ document.addEventListener('DOMContentLoaded', function() {
                        return response.json();
                    })
                    .then(function(subdomainData) {
-                       console.log(subdomainData);
                        // Afficher les résultats dans la zone des résultats
                        statusContainer.innerHTML = '';
 
@@ -302,7 +336,6 @@ document.addEventListener('DOMContentLoaded', function() {
                        for (const domainKey in subdomainData) {
                            if (Object.hasOwnProperty.call(subdomainData, domainKey)) {
                                const domainData = subdomainData[domainKey];
-                               console.log(domainData);
 
                                // Vérifier s'il y a une erreur dans les informations de numérisation Nmap pour ce domaine
                                if (domainData.nmap && domainData.nmap.scaninfo && domainData.nmap.scaninfo.error) {
